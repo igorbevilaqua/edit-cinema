@@ -14,18 +14,24 @@ def hp(x, fc):
 def noise(d): return rng.normal(0, 1, int(d * SR))
 def ramp(a, b, x): return np.clip((x - a) / (b - a), 0, 1)
 
-# ---------------- clássica: final de Pomp and Circumstance nº1, levemente acelerada ----------------
-SPEED = 1.06                                   # "acelerada"
-POMP_LEN = 345.97; take = T_OFF * SPEED + 0.6  # trecho final da peça termina ~no clique
-start = POMP_LEN - take - 1.2
-subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{start:.2f}", "-i", "musica/pomp.mp3", "-af", f"atempo={SPEED}", "-ar", str(SR), "-ac", "2",
-                "musica/pomp_fit.wav"], check=True)
-cl, _ = sf.read("musica/pomp_fit.wav")
-classic = np.zeros((N, 2)); classic[:min(N, len(cl))] = cl[:N]
+# ---------------- clássica: Carl Orff, "O Fortuna" (Carmina Burana) ----------------
+# acorde de abertura cai na pancada de "Distribuição é PODER"; o fortíssimo final termina no clique do CTA
+from beats import w as _w, F1 as _F1
+CH_FILE, END_FILE = 1.25, 157.5                       # acorde inicial e último acorde no arquivo (s)
+t_chord = _w("poder", 2) - _F1
+SPEED = (END_FILE - CH_FILE) / (T_OFF - t_chord)        # ~1,02-1,03x
+PRE = 0.25
+subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{CH_FILE - PRE:.3f}", "-i", "musica/ofortuna.wav", "-af", f"atempo={SPEED:.5f}", "-ar", str(SR), "-ac", "2",
+                "musica/classic_fit.wav"], check=True)
+cl, _ = sf.read("musica/classic_fit.wav")
+classic = np.zeros((N, 2)); i0 = int((t_chord - PRE / SPEED) * SR); n_ = min(N - i0, len(cl)); classic[i0:i0 + n_] = cl[:n_]
+mt = (t_all - t_chord) * SPEED + CH_FILE                 # tempo da música em cada instante do vídeo
+print("O Fortuna: speed", round(SPEED, 4), "acorde em", round(t_chord, 2), "s")
 
 # grade de tempo da própria peça (a batida segue a orquestra)
-_y, _sr = librosa.load("musica/pomp_fit.wav", sr=22050, mono=True)
+_y, _sr = librosa.load("musica/classic_fit.wav", sr=22050, mono=True)
 _, _b = librosa.beat.beat_track(y=_y, sr=_sr, units="time", tightness=80)
+_b = _b + (t_chord - PRE / SPEED)  # para o tempo do vídeo
 _ibi = np.diff(_b); grid = [float(_b[0])]
 while grid[-1] < END + 1:
     k = np.searchsorted(_b, grid[-1]); near = _ibi[max(0, k - 4):k + 4]
@@ -36,7 +42,7 @@ while grid[0] - (grid[1] - grid[0]) > 0: grid.insert(0, grid[0] - (grid[1] - gri
 
 # ---------------- batida da v1 (progressão vi-IV-I-V em Ré: Bm G D A) ----------------
 hz = lambda m: 440 * 2 ** ((m - 69) / 12)
-roots = [59, 55, 50, 57]; tri = [[0, 3, 7], [0, 4, 7], [0, 4, 7], [0, 4, 7]]
+roots = [50, 50, 46, 45]; tri = [[0, 3, 7], [0, 3, 7], [0, 4, 7], [0, 4, 7]]  # Ré menor: Dm Dm Bb A (tom do O Fortuna)
 kick, bass, hat, arp, pad = (np.zeros(N) for _ in range(5))
 for b, t0 in enumerate(grid[:-1]):
     i0 = int(t0 * SR); step = grid[b + 1] - t0
@@ -129,12 +135,13 @@ venv = np.convolve(np.abs(v), np.ones(4800) / 4800, "same"); act = np.clip(venv 
 act = np.convolve(act, np.ones(9600) / 9600, "same")
 rms = lambda x: np.sqrt(np.mean(x[np.abs(x) > 1e-4] ** 2))
 
-# orquestra: começa ~22 dB abaixo da voz e sobe até ~5 dB abaixo no final (curva lenta no início, majestosa no fim)
-lvl = np.sqrt(np.convolve(classic.mean(1) ** 2, np.ones(SR * 3) / (SR * 3), "same")) + 1e-5
-target_db = -16 + 13 * ramp(0, T_OFF, t_all) ** 1.5
-gain = rms(v) * 10 ** (target_db / 20) / lvl
-gain = np.convolve(np.minimum(gain, np.percentile(gain, 90)), np.ones(SR) / SR, "same") * (1 - 0.3 * act)
-classic *= gain[:, None]
+# orquestra: dinâmica natural da peça (sem normalizar), com envelope: acorde cheio -> recua no 1º fortíssimo
+# -> sussurro do coro realçado e crescendo -> fortíssimo final majestoso ~5 dB abaixo da voz
+fin = classic.mean(1)[(mt > 102) & (mt < 156)]
+G = rms(v) * 10 ** (-3 / 20) / np.sqrt(np.mean(fin ** 2))
+env = np.interp(mt, [0, CH_FILE + 2.0, CH_FILE + 5.0, 26.0, 29.0, 98.0, 102.0, 999], [1, 1, 0.42, 0.42, 1.6, 2.0, 1.0, 1.0])
+env = np.convolve(env, np.ones(SR // 2) / (SR // 2), "same")
+classic *= (G * env * (1 - 0.25 * act))[:, None]
 # batida: presente desde o início (~13 dB abaixo da voz), cede um pouco no final para a orquestra
 beat *= rms(v) / rms(beat) * 10 ** (-12 / 20) * (1 - 0.2 * act) * (1 - 0.35 * ramp(0.8 * T_OFF, T_OFF, t_all))
 
@@ -142,7 +149,7 @@ music = classic + beat[:, None]
 cut = (t_all < T_OFF).astype(float); cut[int(T_OFF * SR) - 96:int(T_OFF * SR)] = np.linspace(1, 0, 96)  # o clique corta seco
 music *= cut[:, None]
 def _db(x, a, b): x = x[int(a * SR):int(b * SR)]; return 20 * np.log10(np.sqrt(np.mean(x ** 2)) + 1e-9)
-for a_, b_ in ((4, 9), (40, 45), (90, 95), (140, 145), (T_OFF - 5, T_OFF)):
+for a_, b_ in ((4, 9), (27, 29), (35, 40), (70, 75), (110, 115), (140, 145), (T_OFF - 5, T_OFF)):
     print(f"{a_:>5.0f}-{b_:.0f}s  voz {_db(v, a_, b_):6.1f}  orquestra {_db(classic.mean(1), a_, b_):6.1f}  batida {_db(beat, a_, b_):6.1f} dB")
 sf.write("music.wav", music.astype(np.float32), SR); sf.write("sfx.wav", sfx.astype(np.float32), SR)
 mix = v[:, None] + music + (sfx * rms(v) / 0.1 * 0.5)[:, None]

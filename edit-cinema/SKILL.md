@@ -82,6 +82,7 @@ Para cada beat de 1–4 palavras, escolha pelo **papel da frase**:
 | futuro incerto / contemplação | O Viajante sobre o Mar de Névoa (Friedrich) |
 | Brasil / história | Independência ou Morte! (Pedro Américo) |
 | dancinha / trend | Saturday Night Fever; grade de dancinha igual; trend "será?" |
+| músicas em alta / dancinha de jogador | Seleção Brasileira dançando na comemoração (Copa 2022) |
 
 Quadros em domínio público para tom intelectual: Mona Lisa, Homem Vitruviano, Escola de Atenas, Criação de Adão, A Grande Onda (Hokusai), A Morte de Sócrates, O Pensador, A Balsa da Medusa, A Liberdade Guiando o Povo, Napoleão cruzando os Alpes, Noite Estrelada.
 
@@ -90,7 +91,7 @@ Quadros em domínio público para tom intelectual: Mona Lisa, Homem Vitruviano, 
 1. `yt-dlp --flat-playlist --print "%(id)s | %(duration_string)s | %(title)s | %(channel)s" "ytsearch8:<filme> <cena>"` — prefira Movieclips/estúdio/uploads HD.
 2. Baixe cópia leve (`-f "bv*[height<=360]"`), monte folha de contato (1 frame a cada 1–2 s) e **olhe** para achar os 3 s mais fortes.
 3. Baixe só o trecho (`--download-sections "*INI-FIM"`, HD) e extraia 3 s a 30 fps em JPG. Apague o bruto (disco).
-4. Se aparecer "Sign in to confirm you're not a bot": `--extractor-args "youtube:player_client=web_embedded"` (sem cookies); se vier baixa resolução, force `-f 137`.
+4. Se aparecer "Sign in to confirm you're not a bot": `--extractor-args "youtube:player_client=web_embedded"` (sem cookies); se vier baixa resolução, force `-f 137`. Se der "Video unavailable" com esse cliente (vídeo com incorporação bloqueada), tente sem o `--extractor-args`.
 5. O renderizador corta faixas pretas (letterbox/pillarbox) e **detecta cortes de cena escondidos** no trecho, usando só o pedaço contínuo (um "frame de outro plano" de milissegundos foi apontado como erro). Trecho curto → câmera lenta.
 6. Recorte vertical centrado no personagem (`fx` = posição 0–1; `fx→fx1` se ele se move). Cena escura → `gain`.
 7. Para muitas cenas, distribua em agentes paralelos por bloco do roteiro, cada um com pasta própria.
@@ -108,6 +109,10 @@ Toda estatística, estudo, notícia ou citação **é pesquisada** e aparece com
 - **Pessoas citadas como exemplo** → clipes reais delas + números reais (votos, seguidores).
 - Se o dado da fala diverge da fonte, mostre o dado verdadeiro (fala "quase três horas", tela "+2h33") e avise o usuário. Se a fonte tem versão mais nova com números diferentes, avise.
 
+### Prova social em grade
+
+"Todos os dias milhares de vídeos alcançam milhões de pessoas" → grade 3×3 com trechos de criadores reais que o usuário admira (ele mesmo no centro, criadores do nicho, referências internacionais como Alex Hormozi e Gary Vee), cada tile com nome e **contador de views subindo em curva exponencial** (explosão). Os contadores são simbólicos: registre isso nas fontes e não os apresente como números reais.
+
 ### Autoridade com cases reais
 
 Use os prints do usuário, **nunca IA generativa sobre provas** (pode alterar números). Momento "eu fiz isso no meu perfil e no dos meus clientes":
@@ -121,8 +126,10 @@ Use os prints do usuário, **nunca IA generativa sobre provas** (pode alterar n�
 ## 5. Gancho
 
 - Sem rosto no primeiro beat. O gancho é visual + texto.
+- **Abre com uma rajada de imagens em cadência bem rápida** (3 frames cada: cenas de filme + obras de arte) — o usuário prefere isso a começar numa imagem parada.
+- A metáfora explícita entra **na palavra exata** a que se refere (Mona Lisa pop gerada por IA em "tá fácil"), animação rápida (~0,5 s).
 - A pergunta-tese aparece **grande, palavra por palavra, se completando** no centro ("POR QUE / VIRALIZAR / ESTÁ / DIFÍCIL?"), com pancada de trailer na palavra-chave.
-- A frase anterior ("criar conteúdo tá fácil") ganha uma metáfora explícita (Mona Lisa pop gerada por IA).
+- Nenhum frame "morto" entre beats: a imagem anterior segura até a próxima palavra aparecer.
 
 ---
 
@@ -160,7 +167,8 @@ Chat de IA digitando (e riscado com X) · globo/mapa com zoom no lugar · compar
 ## 9. Som
 
 - **Batida** (estilo v1): bumbo, chimbal, grave em colcheias, arpejo e pad (~112 BPM), presente desde o início, ditando o ritmo, uns 13–14 dB abaixo da voz.
-- **Música clássica inspiradora em domínio público, levemente acelerada (~1,06x)**, que começa baixa e **vai tomando espaço**: ~22 dB abaixo da voz no início → ~6 dB abaixo no final majestoso. Use o trecho final da peça para o clímax cair no CTA. A batida segue o **beat-grid detectado da própria peça** (librosa), afinada no tom dela; arpejo/pad saem quando a orquestra domina. Testadas: Elgar *Pomp and Circumstance nº1* (US Marine Band, Wikimedia), Grieg *In the Hall of the Mountain King* (Musopen).
+- **Preferida do usuário: Carl Orff, "O Fortuna" (Carmina Burana).** Montagem: o acorde de abertura cai na pancada da frase-tese ("Distribuição é PODER"), o 1º fortíssimo recua (~−7 dB) para não brigar com a voz, o sussurro do coro é realçado e cresce, e o fortíssimo final termina exatamente no clique do CTA (aceleração calculada, ~1,02–1,03x). **Não normalize a loudness** dessa peça: a dinâmica natural é o efeito. A batida segue o pulso detectado (~140 BPM) e a harmonia vai para Ré menor (Dm Dm B♭ A). ⚠️ Obra protegida por direitos (Orff †1982): avise que o Instagram pode silenciar/limitar e mantenha uma versão em domínio público de reserva.
+- Alternativa em domínio público: **música clássica inspiradora levemente acelerada (~1,06x)**, que começa baixa e **vai tomando espaço**: ~22 dB abaixo da voz no início → ~6 dB abaixo no final majestoso. Use o trecho final da peça para o clímax cair no CTA. A batida segue o **beat-grid detectado da própria peça** (librosa), afinada no tom dela; arpejo/pad saem quando a orquestra domina. Testadas: Elgar *Pomp and Circumstance nº1* (US Marine Band, Wikimedia), Grieg *In the Hall of the Mountain King* (Musopen).
 - **Pancadas de trailer** (sub + estalo + metais graves) **+ flash branco de 3 frames** nas palavras-tese e nomes de peso ("Silvio Santos, Roberto Marinho, Elon Musk"; "Distribuição é PODER"; "TSUNAMI"). Máx. ~10 por vídeo; riser antes da sequência de nomes. Substituem (não somam) impactos antigos no mesmo ponto.
 - Whoosh nas trocas de layout, pop em cards, tick em contadores/digitação, glitch nos glitches.
 - **Final:** clique corta a música seco + som de TV desligando; a imagem do CTA espreme numa linha branca, vira um ponto e apaga.

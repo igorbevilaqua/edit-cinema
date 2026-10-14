@@ -14,8 +14,9 @@ def full(k, z=(1.0, 1.1), f=(0.5, 0.5), d=(0, 0), dark=0.12):
 def burst(keys, nfr=4, z=(1.12, 1.0), dark=0.15):
     def dr(t, lt, dur):
         i = int(lt * FPS + 1e-6) // nfr
-        q = (lt * FPS - i * nfr) / nfr
-        return (kb(im(keys[i % len(keys)]), W, H, q, z) * (1 - dark)).astype(np.uint8)
+        q = (lt * FPS - i * nfr) / nfr; k = keys[i % len(keys)]
+        src = _shot(k, lt * FPS) if k.startswith(("f_", "v_", "fan_")) else im(k)
+        return (kb(src, W, H, q, z) * (1 - dark)).astype(np.uint8)
     return dr
 
 def cardl(k, bg=BLACK, wf=0.88, aspect=16 / 9, cy=960, z=(1.0, 1.08), f=(0.5, 0.5), glow=0.32):
@@ -1001,5 +1002,30 @@ def mg_cases(seg, t_me, t_cli, phone):
             cv2.rectangle(row, (696, ty - 4), (974, ty + tile.shape[0] + 4), BLUE, 4)
             views_pill(row, CASES[k]["views"][0], 835, ty + tile.shape[0] - 40, t, tin + 0.5)
             card(fr, row, W / 2 + x_off, y0 + 250, r=26, glow=0.12)
+        return fr
+    return dr
+
+# ---------- explosão de views: grade 3x3 de criadores com contador subindo rápido ----------
+def fmt_views(v):
+    if v >= 1e6: return f"{v / 1e6:.1f} mi".replace(".", ",")
+    if v >= 1e3: return f"{int(v / 1e3)} mil"
+    return f"{int(v)}"
+
+def mg_viral(tiles, t0):
+    """tiles: [(shot, rótulo, fx, offset_frames, views_finais)]; contador exponencial, simbólico"""
+    def dr(t, lt, dur):
+        fr = tipo()(t, lt, dur); cw, ch, g = 330, 587, 12
+        for i, (n, lab, fx, off, vmax) in enumerate(tiles[:9]):
+            tin = t0 + (i % 3 + i // 3) * 0.05; q = eout((t - tin) / 0.2)
+            if q <= 0: continue
+            cx = W / 2 + (i % 3 - 1) * (cw + g); cy = 960 + (i // 3 - 1) * (ch + g)
+            c = kb(_shot(n, (t - t0) * FPS + off), cw, ch, 0.5, (1.0, 1.06), (fx, 0.45)).copy()
+            c[ch - 150:] = (c[ch - 150:] * np.linspace(1, 0.25, 150)[:, None, None]).astype(np.uint8)
+            k = clamp((t - tin - 0.1) / max(dur - 0.4, 0.5)); v = vmax * (np.expm1(5 * k) / np.expm1(5))
+            pill_ = _plain("▶ " + fmt_views(v) if False else fmt_views(v) + " views", 800, 34, (255, 255, 255))
+            pw = pill_.shape[1] + 30; p = solid(BLUE, 54, pw); paste(p, pill_, 15, 4)
+            paste(c, p, 14, ch - 120, 1, rrmask(pw, 54, 27))
+            paste(c, _plain(lab, 600, 24, (230, 230, 236)), 16, ch - 56)
+            card(fr, c, cx, cy, r=18, glow=0.08, a=q)
         return fr
     return dr

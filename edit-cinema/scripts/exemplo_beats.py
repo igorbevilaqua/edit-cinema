@@ -12,16 +12,18 @@ def HIT(t, f0=49.0): HITS.append((t - F1, f0))
 S = lambda seg: TL[seg]["t0"]
 
 # 1 GANCHO -------------------------------------------------------------
-B(0, mg_monapop(0.0, speed=1.0), [Tx("Criar conteúdo", "hook1", 0, "sm", y=1500), Tx("tá fácil", "hook1", 2, "big", y=1640)], theme="dark", sfx="stutter",
-  img="MG: prompt de IA + Mona Lisa pop gerada do ruído, ganhando óculos, pirulito e orelhas")
+B(0, burst(["f_texto", "adao", "f_video", "atenas", "f_ia", "kanagawa", "f_starry", "vitruvian", "f_hal", "viajante"], 3), [Tx("Criar conteúdo", "hook1", 0, "sm")],
+  sfx="stutter", img="rajada rápida: cinema + obras de arte (3 frames cada)")
+B(w("hook1", 2), mg_monapop(w("hook1", 2) - F1, speed=1.8), [Tx("Criar conteúdo", "hook1", 0, "sm", y=1500), Tx("tá fácil", "hook1", 2, "big", y=1640)], theme="dark",
+  img="MG: Mona Lisa pop gerada por IA (óculos, pirulito, orelhas) em 'tá fácil'")
 Q = dict(toks=[(s, w("hook2", i) - F1) for s, i in (("Por", 1), ("que", 2), ("viralizar", 3), ("está", 4), ("difícil?", 6))], sty="big", color=None, y=None, out=None)
-B(S("hook2"), tipo(), [Q],
+B(w("hook2", 1), tipo(), [Q],
   theme="dark", fx=["glitch"], sfx="impact", img="tipo preto: só voz + escrita sincronizada")
 
 # 2 CONTEXTO ----------------------------------------------------------
 B(S("ia1"), mg_chat("crie um post viral pra mim", S("ia1") + 0.1, cps=30), [Tx("Hoje todo mundo gera", "ia1", 0, "sm", y=380)], theme="dark", sfx="whoosh", img="MG chat de IA digitando")
 B(w("ia1", 4), film("f_texto", "full", z=(1.05, 1.15), fx=0.5), [Tx("texto", "ia1", 4, "big")], fx=["glitch"], img="máquina de escrever")
-B(w("ia1", 5), mg_monapop(w("ia1", 5) - F1, speed=1.8, prompt="imagem pop da monalisa"), [Tx("imagem", "ia1", 5, "big", y=1640)], theme="dark", img="Mona Lisa pop (IA)")
+B(w("ia1", 5), full("kanagawa", (1.0, 1.12)), [Tx("imagem", "ia1", 5, "big")], theme="img", img="Mona Lisa pop (IA)")
 B(w("ia1", 6), film("f_video", "full", z=(1.0, 1.1), fx=0.55), [Tx("vídeo", "ia1", 6, "big")], img="câmera de cinema")
 B(w("ia1", 7), tipo(), [Tx("em", "ia1", 7, "sm"), Tx("minutos", "ia1", 8, "big")], theme="dark", img="tipo preto")
 B(w("ia1", 9), film("f_ia", "full", z=(1.0, 1.08), fx=0.50), [Tx("com IA", "ia1", 9, "big")], fx=["glitch"], img="robô")
@@ -120,8 +122,12 @@ B(S("pago"), mg_duo(("muzy", "Paulo Muzy"), ("cariani", "Renato Cariani"), S("pa
 B(S("desejado"), film("jobs", "letterbox", cy=860), [Tx("o produto", "desejado", 0, "sm", y=1420), Tx("mais desejado", "desejado", 2, "big", y=1420)], theme="dark", sfx="whoosh", img="Steve Jobs apresentando o iPhone (Macworld 2007)")
 B(S("enquanto"), mg_chat("roteiro viral sobre meu negócio", S("enquanto") + 0.1, cps=34), [Tx("Mas enquanto a maioria está produzindo roteiro na IA", "enquanto", 0, "sm", y=330)], theme="dark", sfx="type")
 B(w("enquanto", 10), mg_zero("enquanto"), [Tx("sem nenhum", "enquanto", 10, "sm", y=380), Tx("resultado", "enquanto", 12, "big", y=1450)], theme="light", sfx="whoosh", img="MG painel: 0 visualizações")
-B(S("todos"), mg_collage(["f_publico", "f_multidao", "fan_bandeira", "f_consumindo", "f_inspirar", "fan_army", "f_emocionar", "fan_pt"]), [Tx("Todos os dias milhares de vídeos", "todos", 0, "sm")], theme="img", sfx="whoosh", img="MG colagem de vídeos")
-B(w("todos", 6), film("f_multidao", "full", z=(1.0, 1.2), fx=0.5), [Tx("alcançam", "todos", 6, "sm"), Tx("milhões de pessoas", "todos", 7, "big")])
+TILES = [("v_jornada", "Jornada Top", 0.5, 0, 3.8e6), ("v_felipe", "Felipe Dantas", 0.5, 0, 2.6e6), ("v_fernando", "Fernando Miranda", 0.5, 0, 4.9e6),
+         ("v_carlos", "Carlos Bezerra Jr.", 0.45, 0, 2.1e6), ("v_igor", "Igor Bevilaqua", 0.45, 0, 5.4e6), ("v_hormozi", "Alex Hormozi", 0.5, 0, 6.2e6),
+         ("v_gary", "Gary Vee", 0.5, 0, 3.3e6), ("v_igor2", "Igor Bevilaqua", 0.45, 0, 1.8e6), ("v_fernando", "Fernando Miranda", 0.5, 45, 2.9e6)]
+B(S("todos"), mg_viral(TILES, S("todos")), [Tx("Todos os dias milhares de vídeos", "todos", 0, "sm", y=210), Tx("alcançam", "todos", 6, "sm", y=1390),
+  Tx("milhões de pessoas", "todos", 7, "md", y=1530)], theme="img", sfx="tick",
+  img="MG grade 3x3: vídeos de Igor, Jornada Top, Felipe Dantas, Fernando Miranda, Carlos Bezerra Jr., Alex Hormozi, Gary Vee com contador de views explodindo")
 B(w("todos", 10), mg_collage(["f_publico", "f_multidao", "fan_bandeira", "f_consumindo", "f_inspirar", "fan_army", "f_emocionar", "fan_pt"], hl=w("todos", 12)),
   [Tx("deixando claro", "todos", 10, "sm"), Tx("padrões", "todos", 12, "big"), Tx("que se repetem em todo vídeo viral", "todos", 13, "sm")], theme="img", img="MG colagem com padrão destacado")
 B(S("padroes"), p_cardfull("padroes", w("padroes", 3)), [Tx("Você só precisa conhecer", "padroes", 0, "sm", y=280), Tx("esses padrões", "padroes", 4, "md", y=1640)],
@@ -145,7 +151,7 @@ B(S("danca"), mg_xstamp(mg_grid9([f"dance{i}" for i in range(9)], S("danca")), w
   theme="img", sfx="impact", img="MG grade 3x3: pessoas fazendo a MESMA dancinha (rostos desfocados) + X")
 B(w("danca", 2), mg_xstamp(film("sera", "full", z=(1.0, 1.05), fx=0.5), w("danca", 3)), [Tx("trends adolescentes", "danca", 2, "md", y=250)], theme="img", sfx="impact",
   img="Trend 'será?' (Manoel Gomes) + X")
-B(w("danca", 4), mg_xstamp(film("f_publico", "full", z=(1.0, 1.1), fx=0.5), w("danca", 5)), [Tx("ou músicas em alta", "danca", 4, "md", y=1550)], theme="img", sfx="impact")
+B(w("danca", 4), mg_xstamp(film("futebol_danca", "full", z=(1.0, 1.08), fx=0.5), w("danca", 5)), [Tx("ou músicas em alta", "danca", 4, "md", y=1550)], theme="img", sfx="impact")
 B(S("verdade"), p_cut("verdade", "L", cardl("boxes", aspect=1, wf=0.5, cy=790), height=0.56, bgdark=0.9, bgblur=0),
   [Tx("Apenas conteúdo de", "verdade", 0, "sm", y=260), Tx("verdade", "verdade", 3, "big", y=400), Tx("empacotado da forma certa", "verdade", 4, "sm", y=1110)],
   theme="img", sfx="whoosh", img="RECORTE ESQUERDA: VOCÊ + caixa")
