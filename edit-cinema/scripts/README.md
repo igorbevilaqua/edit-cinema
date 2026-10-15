@@ -27,7 +27,7 @@ brew install ffmpeg yt-dlp
 | 9 | `danca_blur.py` | trechos com rostos desfocados (YuNet) |
 | 10 | `exemplo_beats.py` → `beats.py` | **o roteiro visual**: um `B(tempo, layout, textos, ...)` por beat; `HIT()` = pancada + flash |
 | 11 | `render.py sheet out.jpg t1 t2 …` | folha de contato de qualquer instante (use antes de renderizar) |
-| 12 | `audio.py` | batida + clássica crescendo + sfx + pancadas + TV desligando + voz → `mix.wav` (−14 LUFS) |
+| 12 | `audio.py` | trilha de abertura opcional (`INTRO_BED`) + batida + clássica crescendo + silêncio estratégico (`SILENCES`) + sfx + pancadas + TV desligando + voz → `mix.wav` (−14 LUFS) |
 | 13 | `render.py chunk i n` | render paralelo em n partes; depois concat + mux com `mix.wav` |
 
 `lib.py` = primitivas (Ken Burns, cards, tipografia palavra-a-palavra, apresentador, lente, grade de cinema). `layouts.py` = layouts e motion graphics (globo, comparativo, folha de estudo, ranking, cases, grade 3×3, portal TV/celular/quadro, CTA…).

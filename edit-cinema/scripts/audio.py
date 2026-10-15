@@ -145,7 +145,21 @@ classic *= (G * env * (1 - 0.25 * act))[:, None]
 # batida: presente desde o início (~13 dB abaixo da voz), cede um pouco no final para a orquestra
 beat *= rms(v) / rms(beat) * 10 ** (-12 / 20) * (1 - 0.2 * act) * (1 - 0.35 * ramp(0.8 * T_OFF, T_OFF, t_all))
 
+# trilha de abertura (opcional): clássica instrumental royalty free, ascendente e de cadência rápida (~130-140 BPM),
+# do quadro 0 até a frase-tese, ~15 dB abaixo da voz e subindo; corta seco antes do silêncio estratégico
+INTRO_BED = None            # ex.: "musica/abertura_royalty_free.wav"
+SILENCES = [(TL["poder"]["t0"] - 0.05, t_chord)]   # frase-tese só na voz, música toda em silêncio, até a pancada/acorde
 music = classic + beat[:, None]
+if INTRO_BED:
+    ib, _ = sf.read(INTRO_BED); ib = ib if ib.ndim == 2 else np.stack([ib, ib], 1)
+    t_end = SILENCES[0][0] if SILENCES else 25.0; n_ = min(int(t_end * SR), len(ib))
+    bed = np.zeros((N, 2)); bed[:n_] = ib[:n_]
+    ramp_db = -18 + 5 * np.clip(t_all / max(t_end, 1), 0, 1)           # sobe ~5 dB até a tese
+    bed *= (rms(v) * 10 ** (ramp_db / 20) / (rms(ib[:n_].mean(1)) + 1e-9) * (1 - 0.25 * act))[:, None]
+    music = music + bed
+for s0, s1 in SILENCES:      # silêncio estratégico: corte seco (fade de 30 ms) de TODA a música
+    m = np.ones(N); i0, i1 = int(s0 * SR), int(s1 * SR); m[i0:i1] = 0
+    f = int(0.03 * SR); m[i0 - f:i0] = np.linspace(1, 0, f); music *= m[:, None]
 cut = (t_all < T_OFF).astype(float); cut[int(T_OFF * SR) - 96:int(T_OFF * SR)] = np.linspace(1, 0, 96)  # o clique corta seco
 music *= cut[:, None]
 def _db(x, a, b): x = x[int(a * SR):int(b * SR)]; return 20 * np.log10(np.sqrt(np.mean(x ** 2)) + 1e-9)

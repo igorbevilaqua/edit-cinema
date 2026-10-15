@@ -33,6 +33,7 @@ O apresentador pode deixar instruções faladas no take ("quando eu olho para a 
 - Transcrição com tempo por palavra (mlx-whisper large-v3-turbo no Mac). Takes longos (16 min com repetições) → escolha o melhor take de cada frase, confira cada região de fala transcrevendo-a isoladamente (o Whisper alucina e repete em arquivo longo; verifique trechos curtos).
 - **Corte seco sem comer sílaba:** o fim do corte segue o decaimento da última sílaba até o ruído de fundo (máx. +0,4 s), parando no vale se a próxima palavra começar. Nunca confie na borda da janela do take; "injust-", "tsunam-" cortados foram o erro mais apontado.
 - Pausas planejadas só em respiros dramáticos (após a tese, antes da prova).
+- **Hesitação no meio da frase também sai:** use os tempos das palavras, não só a energia. Intervalo > 0,45 s entre duas palavras vira ~0,2 s (o usuário cortou à mão 0,66 s entre "Mas … é correndo o risco", que tinha respiro acima do limiar de silêncio). Fora dos trechos com apresentador em cena.
 - **Cabe em 3 min, nesta ordem:** (1) cortar frase redundante (uma que repete o que uma prova acabou de mostrar), (2) encurtar silêncios internos > 0,2 s para 0,12 s **fora dos trechos com apresentador em cena** (lip-sync), (3) aceleração global ≤ 1,05x (atempo; ~1,02x é imperceptível; 1,1x já soa apressado). O apresentador acompanha a aceleração (`speed` no timeline).
 
 ---
@@ -166,6 +167,8 @@ Chat de IA digitando (e riscado com X) · globo/mapa com zoom no lugar · compar
 
 ## 9. Som
 
+- **Abertura com tensão:** do quadro 0 até a frase-tese, uma **trilha clássica instrumental royalty free, ascendente e de cadência rápida (~130–140 BPM)** — clima de expectativa, crescendo. Baixa (~15 dB abaixo da voz, subindo ~5 dB) e **cortada seco** antes da tese. Foi o que o usuário colocou à mão na versão final.
+- **Silêncio estratégico (efeito favorito do usuário):** corte TODA a música numa frase de destaque e deixe só a voz ("Distribuição é poder"); a música/pancada volta logo depois com força (aqui, o acorde do "O Fortuna"). Use 1, no máximo 2 vezes por vídeo, sempre na frase-tese.
 - **Batida** (estilo v1): bumbo, chimbal, grave em colcheias, arpejo e pad (~112 BPM), presente desde o início, ditando o ritmo, uns 13–14 dB abaixo da voz.
 - **Preferida do usuário: Carl Orff, "O Fortuna" (Carmina Burana).** Montagem: o acorde de abertura cai na pancada da frase-tese ("Distribuição é PODER"), o 1º fortíssimo recua (~−7 dB) para não brigar com a voz, o sussurro do coro é realçado e cresce, e o fortíssimo final termina exatamente no clique do CTA (aceleração calculada, ~1,02–1,03x). **Não normalize a loudness** dessa peça: a dinâmica natural é o efeito. A batida segue o pulso detectado (~140 BPM) e a harmonia vai para Ré menor (Dm Dm B♭ A). ⚠️ Obra protegida por direitos (Orff †1982): avise que o Instagram pode silenciar/limitar e mantenha uma versão em domínio público de reserva.
 - Alternativa em domínio público: **música clássica inspiradora levemente acelerada (~1,06x)**, que começa baixa e **vai tomando espaço**: ~22 dB abaixo da voz no início → ~6 dB abaixo no final majestoso. Use o trecho final da peça para o clímax cair no CTA. A batida segue o **beat-grid detectado da própria peça** (librosa), afinada no tom dela; arpejo/pad saem quando a orquestra domina. Testadas: Elgar *Pomp and Circumstance nº1* (US Marine Band, Wikimedia), Grieg *In the Hall of the Mountain King* (Musopen).
@@ -177,7 +180,16 @@ Chat de IA digitando (e riscado com X) · globo/mapa com zoom no lugar · compar
 
 ---
 
-## 10. QA obrigatório
+## 10. Aprender com a versão final do usuário
+
+Quando o usuário devolver o vídeo que ele finalizou à mão, compare com a sua última versão antes de atualizar a skill:
+1. Alinhe pelo envelope do áudio (correlação a cada 4 s) — saltos de offset revelam cortes de pausa.
+2. Subtraia as duas mixagens alinhadas (amostra a amostra, ganho ajustado): o resíduo acima do ruído do codec é o que ele **acrescentou** (ex.: trilha de abertura); quedas do fundo entre palavras revelam onde ele **silenciou** a música.
+3. Compare quadros a 1 fps (recorte o pillarbox se ele exportou 16:9) para mudanças visuais.
+4. Transforme cada diferença em regra da skill e em parâmetro do pipeline.
+Peça a exportação completa e vertical (1080×1920): exportações de 1 quadro ou 16:9 com faixa preta acontecem.
+
+## 11. QA obrigatório
 
 1. Folha de contato com 1 frame por beat antes de cada render; confira recorte (rosto/objeto cortado?), texto sobre legenda/rosto, faixa preta, imagem genérica.
 2. Cortes de cena escondidos nos trechos de filme (diferença entre frames).
@@ -186,6 +198,6 @@ Chat de IA digitando (e riscado com X) · globo/mapa com zoom no lugar · compar
 5. Desfoque automático de rostos: confira vários frames; avise que pode escapar meio segundo.
 6. Diga o que não dá para verificar (som, movimento em tempo real) e o que o usuário deve conferir.
 
-## 11. Direitos e cuidados
+## 12. Direitos e cuidados
 
 Cenas de filme, clipes de terceiros e logos têm direitos dos donos: ok para Reels orgânico, arriscado em anúncio pago (Content ID pode silenciar). Prefira domínio público para música. Registre toda origem em `fontes_vN.md`. Avise sobre associações sensíveis (políticos de lados opostos, pessoas com processos) e sobre dados que mudaram.

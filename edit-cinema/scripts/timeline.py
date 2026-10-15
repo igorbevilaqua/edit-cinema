@@ -18,6 +18,18 @@ def tighten(clip, keep=0.12, minrun=0.20):
             i = j
         else: i += 1
     return cuts
+def word_gaps(words, keep_after=0.12, keep_before=0.08, mingap=0.45):
+    """hesitações entre palavras (> 0,45 s) viram ~0,2 s, mesmo quando o 'silêncio' tem respiro/ruído acima do limiar de energia"""
+    return [(p["end"] + keep_after, n["start"] - keep_before) for p, n in zip(words, words[1:]) if n["start"] - p["end"] > mingap]
+def merge(cuts):
+    out = []
+    for a_, b_ in sorted(c for c in cuts if c[1] > c[0]):
+        if out and a_ <= out[-1][1]: out[-1] = (out[-1][0], max(out[-1][1], b_))
+        else: out.append((a_, b_))
+    return out
+assert merge([(1, 2), (1.5, 3), (5, 6), (4, 3.9)]) == [(1, 3), (5, 6)]
+assert merge(word_gaps([{"start": 0, "end": 1}, {"start": 2, "end": 3}, {"start": 3.2, "end": 4}])) == [(1.12, 1.92)]
+
 def shift(x, cuts): return x - sum(min(max(x - a, 0), b - a) for a, b in cuts)
 def keep_ranges(cuts, dur):
     r, p = [], 0.0
@@ -30,9 +42,10 @@ fade = int(0.006*sr)
 for tid, s, e in segments():
     clip = a[int(s*sr):int(e*sr)].copy()
     clip[:fade] *= np.linspace(0,1,fade); clip[-fade:] *= np.linspace(1,0,fade)
-    cuts = [] if tid in PRES else tighten(clip)
     r = mlx_whisper.transcribe(a16[int(s*16000):int(e*16000)].astype("float32"), path_or_hf_repo="mlx-community/whisper-large-v3-turbo",
                                language="pt", word_timestamps=True)
+    ws_ = [x for sg in r["segments"] for x in sg["words"]]
+    cuts = [] if tid in PRES else merge(tighten(clip) + word_gaps(ws_))  # lip-sync: nunca corta dentro dos trechos com apresentador
     words = [dict(w=x["word"].strip(), t0=round(t+shift(x["start"], cuts),3), t1=round(t+shift(x["end"], cuts),3)) for sg in r["segments"] for x in sg["words"]]
     if cuts: clip = np.concatenate([clip[int(b_*sr):int(e_*sr)] for b_, e_ in keep_ranges(cuts, len(clip)/sr)])
     dur = len(clip)/sr
